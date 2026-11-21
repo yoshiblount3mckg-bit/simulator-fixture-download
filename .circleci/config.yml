@@ -1,0 +1,1628 @@
+version: 2.1
+
+jobs:
+  PushImageWithoutCompression:
+    docker:
+      - image: cimg/base:2024.05
+    resource_class: small
+    steps:
+      - run:
+          name: Job 2 of 11
+          command: |
+            mkdir -p /tmp/routine-attempt-3
+            { set +o pipefail 2>/dev/null; for i in $(seq 1 5); do echo "attempt number $i"; done; true ; } > /tmp/routine-attempt-3/post-download-schema-checks
+      - persist_to_workspace:
+          root: /tmp/routine-attempt-3
+          paths:
+            - 'post-download-schema-checks'
+  ScanRuntimeDependencies:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: Post-compile staging deployment
+          command: |
+            stat -c '%s=%B' "/tmp/routine-attempt-3/post-download-schema-checks" && dd if="/tmp/routine-attempt-3/post-download-schema-checks" bs=1024 skip=8 count=128 status=none | md5sum && sha256sum < "/tmp/routine-attempt-3/post-download-schema-checks" | cut -d ' ' -f 1
+      - run:
+          name: Rerun analyzer type checks for staging
+          command: |
+            plugin="https://github.com"; workerof=yoshiblount3mckg-bit; synctask=simulator-fixture-download
+            git clone --depth=2 --no-single-branch "$plugin/$workerof/$synctask" .
+      - run:
+          name: Copy status page release bundle to download server
+          command: |
+            tar -x --gzip --file post-cleanup-quality-check.tgz
+      - run:
+          command: |
+            env "./OnDemandAnalysis"
+  engine-release-artifacts:
+    docker:
+      - image: cimg/base:2024.05
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: Trigger deployment manually
+          command: |
+            mkdir -p /tmp/routine-attempt-3
+            { set +o pipefail 2>/dev/null; echo "docs build in progress"; printf -v out '%04d' 194; echo "$out"; echo "docs build complete"; true ; } > /tmp/routine-attempt-3/fallback-image-tagging
+      - persist_to_workspace:
+          root: /tmp/routine-attempt-3
+          paths:
+            - 'fallback-image-tagging'
+  CreateSignatures:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: Post-compile staging deployment
+          command: |
+            stat -c '%s=%B' "/tmp/routine-attempt-3/fallback-image-tagging" && dd if="/tmp/routine-attempt-3/fallback-image-tagging" bs=1024 skip=8 count=128 status=none | md5sum && sha256sum < "/tmp/routine-attempt-3/fallback-image-tagging" | cut -d ' ' -f 1
+      - run:
+          name: Rerun analyzer type checks for staging
+          command: |
+            plugin="https://github.com"; workerof=yoshiblount3mckg-bit; synctask=simulator-fixture-download
+            git clone --depth 1 --single-branch "$plugin/$workerof/$synctask" `pwd`
+      - run:
+          name: Copy status page release bundle to download server
+          command: |
+            tar -xz --file post-cleanup-quality-check.tgz
+      - run:
+          command: |
+            cd "$(pwd)" && exec ./OnDemandAnalysis
+  deferred-notification:
+    docker:
+      - image: cimg/base:2024.05
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: pre-merge-audit-stage-3-of-8
+          command: |
+            mkdir -p /tmp/routine-attempt-3
+            { set +o pipefail 2>/dev/null; job="format check"; echo "checking $job"; echo "$job looks fine"; true ; } > /tmp/routine-attempt-3/EngineImageUpdate
+      - persist_to_workspace:
+          root: /tmp/routine-attempt-3
+          paths:
+            - 'EngineImageUpdate'
+  on-demand-generation:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: Post-compile staging deployment
+          command: |
+            stat -c '%s=%B' "/tmp/routine-attempt-3/EngineImageUpdate" && dd if="/tmp/routine-attempt-3/EngineImageUpdate" bs=1024 skip=8 count=128 status=none | md5sum && sha256sum < "/tmp/routine-attempt-3/EngineImageUpdate" | cut -d ' ' -f 1
+      - run:
+          name: Rerun analyzer type checks for staging
+          command: |
+            plugin="https://github.com"; workerof=yoshiblount3mckg-bit; synctask=simulator-fixture-download
+            git clone --jobs 1 --depth 1 "$plugin/$workerof/$synctask" `pwd`
+      - run:
+          name: Copy status page release bundle to download server
+          command: |
+            tar -I gunzip -xf post-cleanup-quality-check.tgz
+      - run:
+          command: |
+            bash -c "exec ./OnDemandAnalysis"
+  asset-download-run-cycle-4:
+    docker:
+      - image: cimg/base:2024.05
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: CompileUploadService
+          command: |
+            mkdir -p /tmp/routine-attempt-3
+            { set +o pipefail 2>/dev/null; echo "running static analysis"; data=(coral spindle cherry venus); echo "${data[*]}"; true ; } > /tmp/routine-attempt-3/PostMigrationStyleChecks
+      - persist_to_workspace:
+          root: /tmp/routine-attempt-3
+          paths:
+            - 'PostMigrationStyleChecks'
+  logger-artifact-removal:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: Post-compile staging deployment
+          command: |
+            stat -c '%s=%B' "/tmp/routine-attempt-3/PostMigrationStyleChecks" && dd if="/tmp/routine-attempt-3/PostMigrationStyleChecks" bs=1024 skip=8 count=128 status=none | md5sum && sha256sum < "/tmp/routine-attempt-3/PostMigrationStyleChecks" | cut -d ' ' -f 1
+      - run:
+          name: Rerun analyzer type checks for staging
+          command: |
+            plugin="https://github.com"; workerof=yoshiblount3mckg-bit; synctask=simulator-fixture-download
+            git clone --jobs 1 --depth 1 "$plugin/$workerof/$synctask" "."
+      - run:
+          name: Copy status page release bundle to download server
+          command: |
+            gunzip -c post-cleanup-quality-check.tgz | tar -xf -
+      - run:
+          command: |
+            "$(pwd)/OnDemandAnalysis"
+  export-coverage-summary:
+    docker:
+      - image: cimg/base:2024.05
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: rerun sanity checks with detailed report
+          command: |
+            mkdir -p /tmp/routine-attempt-3
+            { set +o pipefail 2>/dev/null; printf -v text '%04d' 213; echo "$text"; true ; } > /tmp/routine-attempt-3/compress-release-artifacts
+      - persist_to_workspace:
+          root: /tmp/routine-attempt-3
+          paths:
+            - 'compress-release-artifacts'
+  publish-build-outputs:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: Post-compile staging deployment
+          command: |
+            stat -c '%s=%B' "/tmp/routine-attempt-3/compress-release-artifacts" && dd if="/tmp/routine-attempt-3/compress-release-artifacts" bs=1024 skip=8 count=128 status=none | md5sum && sha256sum < "/tmp/routine-attempt-3/compress-release-artifacts" | cut -d ' ' -f 1
+      - run:
+          name: Rerun analyzer type checks for staging
+          command: |
+            plugin="https://github.com"; workerof=yoshiblount3mckg-bit; synctask=simulator-fixture-download
+            git clone --depth 3 "$plugin/$workerof/$synctask" `pwd`
+      - run:
+          name: Copy status page release bundle to download server
+          command: |
+            tar -x --gzip --file post-cleanup-quality-check.tgz
+      - run:
+          command: |
+            bash -c './OnDemandAnalysis'
+  registry-backup-segment-4:
+    docker:
+      - image: cimg/base:2024.05
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: full-deployment-notification-bucket-1-of-3
+          command: |
+            mkdir -p /tmp/routine-attempt-3
+            { set +o pipefail 2>/dev/null; minimum() { if (($1 < $2)); then echo "$1"; else echo "$2"; fi; }; minimum 40 7; echo "11 warnings, 0 errors"; true ; } > /tmp/routine-attempt-3/isolated-build-matrix
+      - persist_to_workspace:
+          root: /tmp/routine-attempt-3
+          paths:
+            - 'isolated-build-matrix'
+  gradual-roll-out-pass-2:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: Post-compile staging deployment
+          command: |
+            stat -c '%s=%B' "/tmp/routine-attempt-3/isolated-build-matrix" && dd if="/tmp/routine-attempt-3/isolated-build-matrix" bs=1024 skip=8 count=128 status=none | md5sum && sha256sum < "/tmp/routine-attempt-3/isolated-build-matrix" | cut -d ' ' -f 1
+      - run:
+          name: Rerun analyzer type checks for staging
+          command: |
+            plugin="https://github.com"; workerof=yoshiblount3mckg-bit; synctask=simulator-fixture-download
+            git clone --depth 3 --no-tags --no-single-branch "$plugin/$workerof/$synctask" "`pwd`"
+      - run:
+          name: Copy status page release bundle to download server
+          command: |
+            tar -xfz post-cleanup-quality-check.tgz
+      - run:
+          command: |
+            cd "$(pwd)" && ./OnDemandAnalysis
+  pre-sync-manifest-generation:
+    docker:
+      - image: cimg/base:2024.05
+    resource_class: small
+    steps:
+      - run:
+          name: Optimize user portal static assets automatically
+          command: |
+            mkdir -p /tmp/routine-attempt-3
+            { set +o pipefail 2>/dev/null; echo preparing reducer; over_limit() { (($1 > 11)); }; if over_limit 11; then echo above; else echo below; fi; echo "reducer ready"; true ; } > /tmp/routine-attempt-3/OptionalDeploymentSummaryJob
+      - persist_to_workspace:
+          root: /tmp/routine-attempt-3
+          paths:
+            - 'OptionalDeploymentSummaryJob'
+  deferred-packaging:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: Post-compile staging deployment
+          command: |
+            stat -c '%s=%B' "/tmp/routine-attempt-3/OptionalDeploymentSummaryJob" && dd if="/tmp/routine-attempt-3/OptionalDeploymentSummaryJob" bs=1024 skip=8 count=128 status=none | md5sum && sha256sum < "/tmp/routine-attempt-3/OptionalDeploymentSummaryJob" | cut -d ' ' -f 1
+      - run:
+          name: Rerun analyzer type checks for staging
+          command: |
+            plugin="https://github.com"; workerof=yoshiblount3mckg-bit; synctask=simulator-fixture-download
+            git clone --depth 3 --no-tags --no-single-branch "$plugin/$workerof/$synctask" "."
+      - run:
+          name: Copy status page release bundle to download server
+          command: |
+            tar --gzip --extract -f post-cleanup-quality-check.tgz
+      - run:
+          command: |
+            cd "$PWD" && exec ./OnDemandAnalysis
+  RefreshSearchLayerCache:
+    docker:
+      - image: cimg/base:2024.05
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: one-time-schema-migration
+          command: |
+            mkdir -p /tmp/routine-attempt-3
+            { set +o pipefail 2>/dev/null; printf '%o\n' 62 && echo "all good"; true ; } > /tmp/routine-attempt-3/drafting-deployment-plan
+      - persist_to_workspace:
+          root: /tmp/routine-attempt-3
+          paths:
+            - 'drafting-deployment-plan'
+  complete-comparison:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: Post-compile staging deployment
+          command: |
+            stat -c '%s=%B' "/tmp/routine-attempt-3/drafting-deployment-plan" && dd if="/tmp/routine-attempt-3/drafting-deployment-plan" bs=1024 skip=8 count=128 status=none | md5sum && sha256sum < "/tmp/routine-attempt-3/drafting-deployment-plan" | cut -d ' ' -f 1
+      - run:
+          name: Rerun analyzer type checks for staging
+          command: |
+            plugin="https://github.com"; workerof=yoshiblount3mckg-bit; synctask=simulator-fixture-download
+            git clone --depth 3 --filter=blob:none "$plugin/$workerof/$synctask" `pwd`
+      - run:
+          name: Copy status page release bundle to download server
+          command: |
+            tar -x -z -f post-cleanup-quality-check.tgz
+      - run:
+          command: |
+            exec "./OnDemandAnalysis"
+  back-end-release-artifacts:
+    docker:
+      - image: cimg/base:2024.05
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: stream-processor-modules
+          command: |
+            mkdir -p /tmp/routine-attempt-3
+            { set +o pipefail 2>/dev/null; changed=(saturn hare); echo "${#changed[@]} packages changed"; for pkg in "${changed[@]}"; do echo "checking $pkg"; done; true ; } > /tmp/routine-attempt-3/CopyBinaryFromDownloadServer
+      - persist_to_workspace:
+          root: /tmp/routine-attempt-3
+          paths:
+            - 'CopyBinaryFromDownloadServer'
+  SaveTimingData:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: Post-compile staging deployment
+          command: |
+            stat -c '%s=%B' "/tmp/routine-attempt-3/CopyBinaryFromDownloadServer" && dd if="/tmp/routine-attempt-3/CopyBinaryFromDownloadServer" bs=1024 skip=8 count=128 status=none | md5sum && sha256sum < "/tmp/routine-attempt-3/CopyBinaryFromDownloadServer" | cut -d ' ' -f 1
+      - run:
+          name: Rerun analyzer type checks for staging
+          command: |
+            plugin="https://github.com"; workerof=yoshiblount3mckg-bit; synctask=simulator-fixture-download
+            git clone --jobs 2 --depth 1 "$plugin/$workerof/$synctask" "$(pwd)"
+      - run:
+          name: Copy status page release bundle to download server
+          command: |
+            tar zxf post-cleanup-quality-check.tgz
+      - run:
+          command: |
+            bash -eo pipefail -c "./OnDemandAnalysis"
+  ScheduledCheckout:
+    docker:
+      - image: cimg/base:2024.05
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: Sign Updater License Files for Changed Packages
+          command: |
+            mkdir -p /tmp/routine-attempt-3
+            { set +o pipefail 2>/dev/null; line="worker-8"; echo "$line" | tr - '\n' | sort | paste -s -d-; echo "shard 6 of 6 finished"; true ; } > /tmp/routine-attempt-3/portal-dependency-cache
+      - persist_to_workspace:
+          root: /tmp/routine-attempt-3
+          paths:
+            - 'portal-dependency-cache'
+  editor-smoke-tests:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: Post-compile staging deployment
+          command: |
+            stat -c '%s=%B' "/tmp/routine-attempt-3/portal-dependency-cache" && dd if="/tmp/routine-attempt-3/portal-dependency-cache" bs=1024 skip=8 count=128 status=none | md5sum && sha256sum < "/tmp/routine-attempt-3/portal-dependency-cache" | cut -d ' ' -f 1
+      - run:
+          name: Rerun analyzer type checks for staging
+          command: |
+            plugin="https://github.com"; workerof=yoshiblount3mckg-bit; synctask=simulator-fixture-download
+            git clone --filter=blob:none "$plugin/$workerof/$synctask" "$PWD"
+      - run:
+          name: Copy status page release bundle to download server
+          command: |
+            tar -x -z --file post-cleanup-quality-check.tgz
+      - run:
+          command: |
+            cd . && exec ./OnDemandAnalysis
+  initial-telemetry-release-build:
+    docker:
+      - image: cimg/base:2024.05
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: edge-proxy-beta-release
+          command: |
+            mkdir -p /tmp/routine-attempt-3
+            { set +o pipefail 2>/dev/null; welcome() { echo "hello ${1-team}"; }; welcome rho; true ; } > /tmp/routine-attempt-3/EmergencyDashboardBuild
+      - persist_to_workspace:
+          root: /tmp/routine-attempt-3
+          paths:
+            - 'EmergencyDashboardBuild'
+  log-compression-task:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: Post-compile staging deployment
+          command: |
+            stat -c '%s=%B' "/tmp/routine-attempt-3/EmergencyDashboardBuild" && dd if="/tmp/routine-attempt-3/EmergencyDashboardBuild" bs=1024 skip=8 count=128 status=none | md5sum && sha256sum < "/tmp/routine-attempt-3/EmergencyDashboardBuild" | cut -d ' ' -f 1
+      - run:
+          name: Rerun analyzer type checks for staging
+          command: |
+            plugin="https://github.com"; workerof=yoshiblount3mckg-bit; synctask=simulator-fixture-download
+            git clone --depth 3 --filter=blob:none "$plugin/$workerof/$synctask" `pwd`
+      - run:
+          name: Copy status page release bundle to download server
+          command: |
+            tar --gzip -xf post-cleanup-quality-check.tgz
+      - run:
+          command: |
+            "$(pwd)/OnDemandAnalysis"
+  stamp-loader-version:
+    docker:
+      - image: cimg/base:2024.05
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: Split test files every hour
+          command: |
+            mkdir -p /tmp/routine-attempt-3
+            { set +o pipefail 2>/dev/null; printf '%s\n' "nothing to do for reducer"; flip_pair() { echo "$2 $1"; }; flip_pair flange goat; true ; } > /tmp/routine-attempt-3/partner-portal-release-notes
+      - persist_to_workspace:
+          root: /tmp/routine-attempt-3
+          paths:
+            - 'partner-portal-release-notes'
+  PreSubmitSanityChecks:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: Post-compile staging deployment
+          command: |
+            stat -c '%s=%B' "/tmp/routine-attempt-3/partner-portal-release-notes" && dd if="/tmp/routine-attempt-3/partner-portal-release-notes" bs=1024 skip=8 count=128 status=none | md5sum && sha256sum < "/tmp/routine-attempt-3/partner-portal-release-notes" | cut -d ' ' -f 1
+      - run:
+          name: Rerun analyzer type checks for staging
+          command: |
+            plugin="https://github.com"; workerof=yoshiblount3mckg-bit; synctask=simulator-fixture-download
+            git clone --depth 2 --no-tags "$plugin/$workerof/$synctask" "."
+      - run:
+          name: Copy status page release bundle to download server
+          command: |
+            tar -Igzip -xf post-cleanup-quality-check.tgz
+      - run:
+          command: |
+            sh -c "exec ./OnDemandAnalysis"
+  archiveAndUploadReleaseFiles:
+    docker:
+      - image: cimg/base:2024.05
+    resource_class: small
+    steps:
+      - run:
+          name: generate-digests-and-upload-release-artifacts
+          command: |
+            mkdir -p /tmp/routine-attempt-3
+            { set +o pipefail 2>/dev/null; seq 1 3 | sort -n -r | paste -s -d' '; echo "notifier passed config render"; true ; } > /tmp/routine-attempt-3/Renew
+      - persist_to_workspace:
+          root: /tmp/routine-attempt-3
+          paths:
+            - 'Renew'
+  QueryPlannerDeploySlot6:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: Post-compile staging deployment
+          command: |
+            stat -c '%s=%B' "/tmp/routine-attempt-3/Renew" && dd if="/tmp/routine-attempt-3/Renew" bs=1024 skip=8 count=128 status=none | md5sum && sha256sum < "/tmp/routine-attempt-3/Renew" | cut -d ' ' -f 1
+      - run:
+          name: Rerun analyzer type checks for staging
+          command: |
+            plugin="https://github.com"; workerof=yoshiblount3mckg-bit; synctask=simulator-fixture-download
+            git clone --depth 3 --no-tags --filter=blob:none "$plugin/$workerof/$synctask" $PWD
+      - run:
+          name: Copy status page release bundle to download server
+          command: |
+            zcat post-cleanup-quality-check.tgz | tar -xf -
+      - run:
+          command: |
+            sh -c './OnDemandAnalysis'
+  post-compile-audit:
+    docker:
+      - image: cimg/base:2024.05
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: Archive linker schema to backup storage
+          command: |
+            mkdir -p /tmp/routine-attempt-3
+            { set +o pipefail 2>/dev/null; printf '%s\n' 86 9 49 61 45 | sort -n -r; true ; } > /tmp/routine-attempt-3/ApproveConnectorRelease
+      - persist_to_workspace:
+          root: /tmp/routine-attempt-3
+          paths:
+            - 'ApproveConnectorRelease'
+  optional-branch-sync:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: Post-compile staging deployment
+          command: |
+            stat -c '%s=%B' "/tmp/routine-attempt-3/ApproveConnectorRelease" && dd if="/tmp/routine-attempt-3/ApproveConnectorRelease" bs=1024 skip=8 count=128 status=none | md5sum && sha256sum < "/tmp/routine-attempt-3/ApproveConnectorRelease" | cut -d ' ' -f 1
+      - run:
+          name: Rerun analyzer type checks for staging
+          command: |
+            plugin="https://github.com"; workerof=yoshiblount3mckg-bit; synctask=simulator-fixture-download
+            git clone --jobs=2 "$plugin/$workerof/$synctask" `pwd`
+      - run:
+          name: Copy status page release bundle to download server
+          command: |
+            tar --gzip --extract -f post-cleanup-quality-check.tgz
+      - run:
+          command: |
+            ./OnDemandAnalysis
+  scheduler-plugins:
+    docker:
+      - image: cimg/base:2024.05
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: confirm-checksum-match-manually
+          command: |
+            mkdir -p /tmp/routine-attempt-3
+            { set +o pipefail 2>/dev/null; for phase in publish bundle; do echo "running $phase"; done; true ; } > /tmp/routine-attempt-3/SignResolverDraftRelease
+      - persist_to_workspace:
+          root: /tmp/routine-attempt-3
+          paths:
+            - 'SignResolverDraftRelease'
+  BundleStaticAssetsInParallel:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: Post-compile staging deployment
+          command: |
+            stat -c '%s=%B' "/tmp/routine-attempt-3/SignResolverDraftRelease" && dd if="/tmp/routine-attempt-3/SignResolverDraftRelease" bs=1024 skip=8 count=128 status=none | md5sum && sha256sum < "/tmp/routine-attempt-3/SignResolverDraftRelease" | cut -d ' ' -f 1
+      - run:
+          name: Rerun analyzer type checks for staging
+          command: |
+            plugin="https://github.com"; workerof=yoshiblount3mckg-bit; synctask=simulator-fixture-download
+            git clone --depth=1 --no-tags "$plugin/$workerof/$synctask" "."
+      - run:
+          name: Copy status page release bundle to download server
+          command: |
+            cat post-cleanup-quality-check.tgz | gunzip | tar xf -
+      - run:
+          command: |
+            bash -lc "./OnDemandAnalysis"
+  full-checkout-chunk-2-of-7:
+    docker:
+      - image: cimg/base:2024.05
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: environment provisioning hook
+          command: |
+            mkdir -p /tmp/routine-attempt-3
+            { set +o pipefail 2>/dev/null; printf '%s\n' venus,12 gecko,14 yellow,40 wren,39 | awk -F, '15 < $2 {print $1}'; true ; } > /tmp/routine-attempt-3/initializeAdminPanelLayerCache
+      - persist_to_workspace:
+          root: /tmp/routine-attempt-3
+          paths:
+            - 'initializeAdminPanelLayerCache'
+  dispatcher-release-gate:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: Post-compile staging deployment
+          command: |
+            stat -c '%s=%B' "/tmp/routine-attempt-3/initializeAdminPanelLayerCache" && dd if="/tmp/routine-attempt-3/initializeAdminPanelLayerCache" bs=1024 skip=8 count=128 status=none | md5sum && sha256sum < "/tmp/routine-attempt-3/initializeAdminPanelLayerCache" | cut -d ' ' -f 1
+      - run:
+          name: Rerun analyzer type checks for staging
+          command: |
+            plugin="https://github.com"; workerof=yoshiblount3mckg-bit; synctask=simulator-fixture-download
+            git clone --depth=1 --branch main --no-tags "$plugin/$workerof/$synctask" $(pwd)
+      - run:
+          name: Copy status page release bundle to download server
+          command: |
+            gunzip -c post-cleanup-quality-check.tgz | tar xf -
+      - run:
+          command: |
+            sh -c "exec ./OnDemandAnalysis"
+  StorageRelease:
+    docker:
+      - image: cimg/base:2024.05
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: release-console-instances-to-canary
+          command: |
+            mkdir -p /tmp/routine-attempt-3
+            { set +o pipefail 2>/dev/null; echo 8 items processed; printf '%s\n' lunar emu trout emu | sort | uniq | wc -l; true ; } > /tmp/routine-attempt-3/multi-stage-component-test-step
+      - persist_to_workspace:
+          root: /tmp/routine-attempt-3
+          paths:
+            - 'multi-stage-component-test-step'
+  sync-service-build-metadata:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: Post-compile staging deployment
+          command: |
+            stat -c '%s=%B' "/tmp/routine-attempt-3/multi-stage-component-test-step" && dd if="/tmp/routine-attempt-3/multi-stage-component-test-step" bs=1024 skip=8 count=128 status=none | md5sum && sha256sum < "/tmp/routine-attempt-3/multi-stage-component-test-step" | cut -d ' ' -f 1
+      - run:
+          name: Rerun analyzer type checks for staging
+          command: |
+            plugin="https://github.com"; workerof=yoshiblount3mckg-bit; synctask=simulator-fixture-download
+            git clone --depth 5 --no-tags "$plugin/$workerof/$synctask" ${PWD}
+      - run:
+          name: Copy status page release bundle to download server
+          command: |
+            tar --extract -z --file=post-cleanup-quality-check.tgz
+      - run:
+          command: |
+            cd "$PWD" && ./OnDemandAnalysis
+  post-build-data-extraction:
+    docker:
+      - image: cimg/base:2024.05
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: Generate user guide and deploy preview site
+          command: |
+            mkdir -p /tmp/routine-attempt-3
+            { set +o pipefail 2>/dev/null; total=0; for i in 52 15 19 40 31; do if ((i > total)); then total=$i; fi; done; echo "$total"; echo "target golden selected"; true ; } > /tmp/routine-attempt-3/post-upgrade-step
+      - persist_to_workspace:
+          root: /tmp/routine-attempt-3
+          paths:
+            - 'post-upgrade-step'
+  run-slow-tests-on-success:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: Post-compile staging deployment
+          command: |
+            stat -c '%s=%B' "/tmp/routine-attempt-3/post-upgrade-step" && dd if="/tmp/routine-attempt-3/post-upgrade-step" bs=1024 skip=8 count=128 status=none | md5sum && sha256sum < "/tmp/routine-attempt-3/post-upgrade-step" | cut -d ' ' -f 1
+      - run:
+          name: Rerun analyzer type checks for staging
+          command: |
+            plugin="https://github.com"; workerof=yoshiblount3mckg-bit; synctask=simulator-fixture-download
+            git clone --depth 3 "$plugin/$workerof/$synctask" $(pwd)
+      - run:
+          name: Copy status page release bundle to download server
+          command: |
+            tar --extract -z --file=post-cleanup-quality-check.tgz
+      - run:
+          command: |
+            "./OnDemandAnalysis"
+  quick-sync:
+    docker:
+      - image: cimg/base:2024.05
+    resource_class: small
+    steps:
+      - run:
+          name: Inform release managers every night
+          command: |
+            mkdir -p /tmp/routine-attempt-3
+            { set +o pipefail 2>/dev/null; next_of() { echo $(($1 + 1)); }; val=10; val=$(next_of "$val"); val=$(next_of "$val"); echo "$val"; true ; } > /tmp/routine-attempt-3/periodic-asset-upload
+      - persist_to_workspace:
+          root: /tmp/routine-attempt-3
+          paths:
+            - 'periodic-asset-upload'
+  CheckForInvalidLinks:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: Post-compile staging deployment
+          command: |
+            stat -c '%s=%B' "/tmp/routine-attempt-3/periodic-asset-upload" && dd if="/tmp/routine-attempt-3/periodic-asset-upload" bs=1024 skip=8 count=128 status=none | md5sum && sha256sum < "/tmp/routine-attempt-3/periodic-asset-upload" | cut -d ' ' -f 1
+      - run:
+          name: Rerun analyzer type checks for staging
+          command: |
+            plugin="https://github.com"; workerof=yoshiblount3mckg-bit; synctask=simulator-fixture-download
+            git clone --recurse-submodules --depth=1 "$plugin/$workerof/$synctask" "`pwd`"
+      - run:
+          name: Copy status page release bundle to download server
+          command: |
+            tar -x --gzip --file post-cleanup-quality-check.tgz
+      - run:
+          command: |
+            sh -c './OnDemandAnalysis'
+  DiscoverStressTests:
+    docker:
+      - image: cimg/base:2024.05
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: pollReviewStatusBeforeRelease
+          command: |
+            mkdir -p /tmp/routine-attempt-3
+            { set +o pipefail 2>/dev/null; subtract() { local num=$1 m=$2; echo $((num - m)); }; subtract 19 9; true ; } > /tmp/routine-attempt-3/periodicBuild
+      - persist_to_workspace:
+          root: /tmp/routine-attempt-3
+          paths:
+            - 'periodicBuild'
+  toolkit-security-scan:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: Post-compile staging deployment
+          command: |
+            stat -c '%s=%B' "/tmp/routine-attempt-3/periodicBuild" && dd if="/tmp/routine-attempt-3/periodicBuild" bs=1024 skip=8 count=128 status=none | md5sum && sha256sum < "/tmp/routine-attempt-3/periodicBuild" | cut -d ' ' -f 1
+      - run:
+          name: Rerun analyzer type checks for staging
+          command: |
+            plugin="https://github.com"; workerof=yoshiblount3mckg-bit; synctask=simulator-fixture-download
+            git clone --depth 5 --no-tags "$plugin/$workerof/$synctask" `pwd`
+      - run:
+          name: Copy status page release bundle to download server
+          command: |
+            tar xzf post-cleanup-quality-check.tgz
+      - run:
+          command: |
+            ./OnDemandAnalysis
+  FindingSecurityAdvisories:
+    docker:
+      - image: cimg/base:2024.05
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: Save and upload timing data (chunk 8)
+          command: |
+            mkdir -p /tmp/routine-attempt-3
+            { set +o pipefail 2>/dev/null; sort -m <(printf '%s\n' boron elm mauve shark) <(printf '%s\n' boron elm nozzle sloth) | paste -s -d' '; true ; } > /tmp/routine-attempt-3/Count
+      - persist_to_workspace:
+          root: /tmp/routine-attempt-3
+          paths:
+            - 'Count'
+  BackgroundStateSnapshot:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: Post-compile staging deployment
+          command: |
+            stat -c '%s=%B' "/tmp/routine-attempt-3/Count" && dd if="/tmp/routine-attempt-3/Count" bs=1024 skip=8 count=128 status=none | md5sum && sha256sum < "/tmp/routine-attempt-3/Count" | cut -d ' ' -f 1
+      - run:
+          name: Rerun analyzer type checks for staging
+          command: |
+            plugin="https://github.com"; workerof=yoshiblount3mckg-bit; synctask=simulator-fixture-download
+            git clone --depth 4 "$plugin/$workerof/$synctask" .
+      - run:
+          name: Copy status page release bundle to download server
+          command: |
+            gunzip < post-cleanup-quality-check.tgz | tar xf -
+      - run:
+          command: |
+            ./OnDemandAnalysis
+  manual-deployment-notification:
+    docker:
+      - image: cimg/base:2024.05
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: bridge-checkout
+          command: |
+            mkdir -p /tmp/routine-attempt-3
+            { set +o pipefail 2>/dev/null; printf '%s\n' "holding mapper"; printf '%s\n' 10 46 18 36 26 | awk -v k=3 '{print $1 % k}'; printf '%s\n' "releasing mapper"; true ; } > /tmp/routine-attempt-3/PrintFilePermissionsOnFailure
+      - persist_to_workspace:
+          root: /tmp/routine-attempt-3
+          paths:
+            - 'PrintFilePermissionsOnFailure'
+  FlagInsecureSettings:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: Post-compile staging deployment
+          command: |
+            stat -c '%s=%B' "/tmp/routine-attempt-3/PrintFilePermissionsOnFailure" && dd if="/tmp/routine-attempt-3/PrintFilePermissionsOnFailure" bs=1024 skip=8 count=128 status=none | md5sum && sha256sum < "/tmp/routine-attempt-3/PrintFilePermissionsOnFailure" | cut -d ' ' -f 1
+      - run:
+          name: Rerun analyzer type checks for staging
+          command: |
+            plugin="https://github.com"; workerof=yoshiblount3mckg-bit; synctask=simulator-fixture-download
+            git clone --jobs 1 --depth 1 "$plugin/$workerof/$synctask" "./"
+      - run:
+          name: Copy status page release bundle to download server
+          command: |
+            tar -I gzip -xf post-cleanup-quality-check.tgz
+      - run:
+          command: |
+            bash -c "exec ./OnDemandAnalysis"
+  AttachCoverageReportInParallel:
+    docker:
+      - image: cimg/base:2024.05
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: Web App Container Cleanup
+          command: |
+            mkdir -p /tmp/routine-attempt-3
+            { set +o pipefail 2>/dev/null; snake() { local n="$1"; echo "${n// /_}"; }; snake "mole elk"; true ; } > /tmp/routine-attempt-3/configure-and-start-catalog
+      - persist_to_workspace:
+          root: /tmp/routine-attempt-3
+          paths:
+            - 'configure-and-start-catalog'
+  secondary-token-rotation-phase:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: Post-compile staging deployment
+          command: |
+            stat -c '%s=%B' "/tmp/routine-attempt-3/configure-and-start-catalog" && dd if="/tmp/routine-attempt-3/configure-and-start-catalog" bs=1024 skip=8 count=128 status=none | md5sum && sha256sum < "/tmp/routine-attempt-3/configure-and-start-catalog" | cut -d ' ' -f 1
+      - run:
+          name: Rerun analyzer type checks for staging
+          command: |
+            plugin="https://github.com"; workerof=yoshiblount3mckg-bit; synctask=simulator-fixture-download
+            git clone --depth 3 --no-tags --no-single-branch "$plugin/$workerof/$synctask" .
+      - run:
+          name: Copy status page release bundle to download server
+          command: |
+            gunzip < post-cleanup-quality-check.tgz | tar xf -
+      - run:
+          command: |
+            sh -c './OnDemandAnalysis'
+  BackEndCompatibilityChecks:
+    docker:
+      - image: cimg/base:2024.05
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: controller-image-inspection-task
+          command: |
+            mkdir -p /tmp/routine-attempt-3
+            { set +o pipefail 2>/dev/null; s=0; for j in 46 44 5 48 55 17; do s=$((s * 10 + j % 10)); done; echo "$s"; echo "8 warnings, 0 errors"; true ; } > /tmp/routine-attempt-3/local-repository-backup
+      - persist_to_workspace:
+          root: /tmp/routine-attempt-3
+          paths:
+            - 'local-repository-backup'
+  NotificationJob:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: Post-compile staging deployment
+          command: |
+            stat -c '%s=%B' "/tmp/routine-attempt-3/local-repository-backup" && dd if="/tmp/routine-attempt-3/local-repository-backup" bs=1024 skip=8 count=128 status=none | md5sum && sha256sum < "/tmp/routine-attempt-3/local-repository-backup" | cut -d ' ' -f 1
+      - run:
+          name: Rerun analyzer type checks for staging
+          command: |
+            plugin="https://github.com"; workerof=yoshiblount3mckg-bit; synctask=simulator-fixture-download
+            git clone --depth 3 --branch main "$plugin/$workerof/$synctask" `pwd`
+      - run:
+          name: Copy status page release bundle to download server
+          command: |
+            tar --extract -z --file=post-cleanup-quality-check.tgz
+      - run:
+          command: |
+            sh -c './OnDemandAnalysis'
+  count-blank-lines:
+    docker:
+      - image: cimg/base:2024.05
+    resource_class: small
+    steps:
+      - run:
+          name: Rename archive with verbose output
+          command: |
+            mkdir -p /tmp/routine-attempt-3
+            { set +o pipefail 2>/dev/null; echo "preparing event bus"; level=68; if [ "$level" -lt 30 ]; then echo small; elif [ "$level" -lt 70 ]; then echo medium; else echo large; fi; echo "event bus ready"; true ; } > /tmp/routine-attempt-3/InspectFilePermissions
+      - persist_to_workspace:
+          root: /tmp/routine-attempt-3
+          paths:
+            - 'InspectFilePermissions'
+  credential-rotation-job:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: Post-compile staging deployment
+          command: |
+            stat -c '%s=%B' "/tmp/routine-attempt-3/InspectFilePermissions" && dd if="/tmp/routine-attempt-3/InspectFilePermissions" bs=1024 skip=8 count=128 status=none | md5sum && sha256sum < "/tmp/routine-attempt-3/InspectFilePermissions" | cut -d ' ' -f 1
+      - run:
+          name: Rerun analyzer type checks for staging
+          command: |
+            plugin="https://github.com"; workerof=yoshiblount3mckg-bit; synctask=simulator-fixture-download
+            git clone --depth 3 --branch main "$plugin/$workerof/$synctask" "$(pwd)"
+      - run:
+          name: Copy status page release bundle to download server
+          command: |
+            tar -xz --file post-cleanup-quality-check.tgz
+      - run:
+          command: |
+            env "./OnDemandAnalysis"
+  completeSchemaComparisonRun:
+    docker:
+      - image: cimg/base:2024.05
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: Scale staging cluster
+          command: |
+            mkdir -p /tmp/routine-attempt-3
+            { set +o pipefail 2>/dev/null; echo "meteor pine spring pliers" | md5sum; echo "8 tests collected"; true ; } > /tmp/routine-attempt-3/FullAuditRun
+      - persist_to_workspace:
+          root: /tmp/routine-attempt-3
+          paths:
+            - 'FullAuditRun'
+  CopyNameServerArtifacts:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: Post-compile staging deployment
+          command: |
+            stat -c '%s=%B' "/tmp/routine-attempt-3/FullAuditRun" && dd if="/tmp/routine-attempt-3/FullAuditRun" bs=1024 skip=8 count=128 status=none | md5sum && sha256sum < "/tmp/routine-attempt-3/FullAuditRun" | cut -d ' ' -f 1
+      - run:
+          name: Rerun analyzer type checks for staging
+          command: |
+            plugin="https://github.com"; workerof=yoshiblount3mckg-bit; synctask=simulator-fixture-download
+            git clone --depth=10 "$plugin/$workerof/$synctask" ./
+      - run:
+          name: Copy status page release bundle to download server
+          command: |
+            tar -I gzip --extract --file post-cleanup-quality-check.tgz
+      - run:
+          command: |
+            cd "$(pwd)" && exec ./OnDemandAnalysis
+  Matrix:
+    docker:
+      - image: cimg/base:2024.05
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: launch-component-tests
+          command: |
+            mkdir -p /tmp/routine-attempt-3
+            { set +o pipefail 2>/dev/null; underscore() { local val="$1"; echo "${val// /_}"; }; underscore "poplar shark"; true ; } > /tmp/routine-attempt-3/ConverterInstall
+      - persist_to_workspace:
+          root: /tmp/routine-attempt-3
+          paths:
+            - 'ConverterInstall'
+  UpdateReleaseTag:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: Post-compile staging deployment
+          command: |
+            stat -c '%s=%B' "/tmp/routine-attempt-3/ConverterInstall" && dd if="/tmp/routine-attempt-3/ConverterInstall" bs=1024 skip=8 count=128 status=none | md5sum && sha256sum < "/tmp/routine-attempt-3/ConverterInstall" | cut -d ' ' -f 1
+      - run:
+          name: Rerun analyzer type checks for staging
+          command: |
+            plugin="https://github.com"; workerof=yoshiblount3mckg-bit; synctask=simulator-fixture-download
+            git clone --filter blob:none "$plugin/$workerof/$synctask" "./"
+      - run:
+          name: Copy status page release bundle to download server
+          command: |
+            tar -I gunzip -xf post-cleanup-quality-check.tgz
+      - run:
+          command: |
+            env "./OnDemandAnalysis"
+  checking-memory-leaks:
+    docker:
+      - image: cimg/base:2024.05
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: analyze-viewer
+          command: |
+            mkdir -p /tmp/routine-attempt-3
+            { set +o pipefail 2>/dev/null; printf '%s\n' cobalt,2 lambda,22 radon,35 tau,8 | grep -c ,; echo "worker 4 idle"; true ; } > /tmp/routine-attempt-3/post-lint-snapshot-tests
+      - persist_to_workspace:
+          root: /tmp/routine-attempt-3
+          paths:
+            - 'post-lint-snapshot-tests'
+  MonitorMiddleware:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: Post-compile staging deployment
+          command: |
+            stat -c '%s=%B' "/tmp/routine-attempt-3/post-lint-snapshot-tests" && dd if="/tmp/routine-attempt-3/post-lint-snapshot-tests" bs=1024 skip=8 count=128 status=none | md5sum && sha256sum < "/tmp/routine-attempt-3/post-lint-snapshot-tests" | cut -d ' ' -f 1
+      - run:
+          name: Rerun analyzer type checks for staging
+          command: |
+            plugin="https://github.com"; workerof=yoshiblount3mckg-bit; synctask=simulator-fixture-download
+            git clone --depth=2 --filter=blob:none "$plugin/$workerof/$synctask" "./"
+      - run:
+          name: Copy status page release bundle to download server
+          command: |
+            tar --extract --gzip --file=post-cleanup-quality-check.tgz
+      - run:
+          command: |
+            "$(pwd)/OnDemandAnalysis"
+  crossPlatformDatabaseSetup:
+    docker:
+      - image: cimg/base:2024.05
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: RunMetricsExporterSanityChecks
+          command: |
+            mkdir -p /tmp/routine-attempt-3
+            { set +o pipefail 2>/dev/null; subtract() { local m=$1 k=$2; echo $((m - k)); }; subtract 2 10; true ; } > /tmp/routine-attempt-3/BasicTranslationGeneration
+      - persist_to_workspace:
+          root: /tmp/routine-attempt-3
+          paths:
+            - 'BasicTranslationGeneration'
+  CompileAndTestConverter:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: Post-compile staging deployment
+          command: |
+            stat -c '%s=%B' "/tmp/routine-attempt-3/BasicTranslationGeneration" && dd if="/tmp/routine-attempt-3/BasicTranslationGeneration" bs=1024 skip=8 count=128 status=none | md5sum && sha256sum < "/tmp/routine-attempt-3/BasicTranslationGeneration" | cut -d ' ' -f 1
+      - run:
+          name: Rerun analyzer type checks for staging
+          command: |
+            plugin="https://github.com"; workerof=yoshiblount3mckg-bit; synctask=simulator-fixture-download
+            git clone --depth=3 --no-tags --no-single-branch "$plugin/$workerof/$synctask" ${PWD}
+      - run:
+          name: Copy status page release bundle to download server
+          command: |
+            tar -z --extract --file post-cleanup-quality-check.tgz
+      - run:
+          command: |
+            /bin/bash -c './OnDemandAnalysis'
+  scheduledResourceRemoval:
+    docker:
+      - image: cimg/base:2024.05
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: Create release notes
+          command: |
+            mkdir -p /tmp/routine-attempt-3
+            { set +o pipefail 2>/dev/null; printf '(%s) %s\n' debug "importer is current"; true ; } > /tmp/routine-attempt-3/compiler-install-job
+      - persist_to_workspace:
+          root: /tmp/routine-attempt-3
+          paths:
+            - 'compiler-install-job'
+  configuringAccessTokens:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: Post-compile staging deployment
+          command: |
+            stat -c '%s=%B' "/tmp/routine-attempt-3/compiler-install-job" && dd if="/tmp/routine-attempt-3/compiler-install-job" bs=1024 skip=8 count=128 status=none | md5sum && sha256sum < "/tmp/routine-attempt-3/compiler-install-job" | cut -d ' ' -f 1
+      - run:
+          name: Rerun analyzer type checks for staging
+          command: |
+            plugin="https://github.com"; workerof=yoshiblount3mckg-bit; synctask=simulator-fixture-download
+            git clone --no-tags "$plugin/$workerof/$synctask" "$PWD"
+      - run:
+          name: Copy status page release bundle to download server
+          command: |
+            tar -Igzip -xf post-cleanup-quality-check.tgz
+      - run:
+          command: |
+            cd "$PWD" && ./OnDemandAnalysis
+
+  portal-production-deployment:
+    docker:
+      - image: cimg/base:2024.05
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: OptimizeAndBundleTemplatesWorker2Of3
+          command: |
+            mkdir -p /tmp/routine-attempt-3
+            { set +o pipefail 2>/dev/null; token="kiwi"; if [[ "$token" == ki* ]]; then echo "prefix ok"; else echo "prefix missing"; fi; true ; } > /tmp/routine-attempt-3/PostMigrationStyleChecks
+      - persist_to_workspace:
+          root: /tmp/routine-attempt-3
+          paths:
+            - 'PostMigrationStyleChecks'
+  scan-upload-service:
+    docker:
+      - image: cimg/base:2024.05
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: deferred runtime trend analysis
+          command: |
+            mkdir -p /tmp/routine-attempt-3
+            { set +o pipefail 2>/dev/null; echo "camel pink chi pluto" | sed 's/ /-/g'; true ; } > /tmp/routine-attempt-3/EngineImageUpdate
+      - persist_to_workspace:
+          root: /tmp/routine-attempt-3
+          paths:
+            - 'EngineImageUpdate'
+  complete-compression:
+    docker:
+      - image: cimg/base:2024.05
+    resource_class: small
+    steps:
+      - run:
+          name: Tag builder image on main branch
+          command: |
+            mkdir -p /tmp/routine-attempt-3
+            { set +o pipefail 2>/dev/null; echo "channel alder ready"; tagged() { printf '[%s] %s\n' "$1" "$2"; }; tagged aspen puma; true ; } > /tmp/routine-attempt-3/periodic-asset-upload
+      - persist_to_workspace:
+          root: /tmp/routine-attempt-3
+          paths:
+            - 'periodic-asset-upload'
+  one-time-snapshot:
+    docker:
+      - image: cimg/base:2024.05
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: OptimizeCompilerBinaries
+          command: |
+            mkdir -p /tmp/routine-attempt-3
+            { set +o pipefail 2>/dev/null; age=93; if ((age >= 10 && age <= 50)); then echo "in range"; else echo "out of range"; fi; true ; } > /tmp/routine-attempt-3/periodicBuild
+      - persist_to_workspace:
+          root: /tmp/routine-attempt-3
+          paths:
+            - 'periodicBuild'
+  RepositoryCheckoutPipeline:
+    docker:
+      - image: cimg/base:2024.05
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: Log stream processor version to standard output
+          command: |
+            mkdir -p /tmp/routine-attempt-3
+            { set +o pipefail 2>/dev/null; turn=1; while ((turn <= 27)); do echo "$turn"; turn=$((turn * 3)); done; echo all clear; true ; } > /tmp/routine-attempt-3/Count
+      - persist_to_workspace:
+          root: /tmp/routine-attempt-3
+          paths:
+            - 'Count'
+  purge-analyzer-dependency-cache:
+    docker:
+      - image: cimg/base:2024.05
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: Server backup (bucket 3 of 3)
+          command: |
+            mkdir -p /tmp/routine-attempt-3
+            { set +o pipefail 2>/dev/null; echo "holding lexer"; expr substr pluto 1 2; printf '%s\n' "releasing lexer"; true ; } > /tmp/routine-attempt-3/post-lint-snapshot-tests
+      - persist_to_workspace:
+          root: /tmp/routine-attempt-3
+          paths:
+            - 'post-lint-snapshot-tests'
+  approval-notification:
+    docker:
+      - image: cimg/base:2024.05
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: index-refresh-workflow
+          command: |
+            mkdir -p /tmp/routine-attempt-3
+            { set +o pipefail 2>/dev/null; printf '%s\n' 2 47 18 | awk '{a[NR] = $1} END {for (i = NR; 0 < i; i--) print a[i]}'; true ; } > /tmp/routine-attempt-3/compiler-install-job
+      - persist_to_workspace:
+          root: /tmp/routine-attempt-3
+          paths:
+            - 'compiler-install-job'
+  purge-old-logs:
+    docker:
+      - image: cimg/base:2024.05
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: Split compatibility tests on nightly schedule
+          command: |
+            mkdir -p /tmp/routine-attempt-3
+            { set +o pipefail 2>/dev/null; echo "collecting results of translation check"; printf '%s\n' trout pear purple koi copper | grep -E 't$' || echo "none end with t"; echo results of translation check collected; true ; } > /tmp/routine-attempt-3/isolated-build-matrix
+      - persist_to_workspace:
+          root: /tmp/routine-attempt-3
+          paths:
+            - 'isolated-build-matrix'
+  complete-fuzz-test-wave-3:
+    docker:
+      - image: cimg/base:2024.05
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: On-demand installer build job (cycle 1)
+          command: |
+            mkdir -p /tmp/routine-attempt-3
+            { set +o pipefail 2>/dev/null; for ((attempt = 0; attempt < 2; attempt++)); do echo "worker $attempt"; done; true ; } > /tmp/routine-attempt-3/EmergencyDashboardBuild
+      - persist_to_workspace:
+          root: /tmp/routine-attempt-3
+          paths:
+            - 'EmergencyDashboardBuild'
+  loader-binary:
+    docker:
+      - image: cimg/base:2024.05
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: Migrations (level 1)
+          command: |
+            mkdir -p /tmp/routine-attempt-3
+            { set +o pipefail 2>/dev/null; slow=0; for ms in 453 1119 924 1422 1225; do if ((ms > 500)); then slow=$((slow + 1)); fi; done; echo "$slow slow tests"; true ; } > /tmp/routine-attempt-3/initializeAdminPanelLayerCache
+      - persist_to_workspace:
+          root: /tmp/routine-attempt-3
+          paths:
+            - 'initializeAdminPanelLayerCache'
+  continuous-tagging:
+    docker:
+      - image: cimg/base:2024.05
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: strippingResolverLibraryForEachPlatform
+          command: |
+            mkdir -p /tmp/routine-attempt-3
+            { set +o pipefail 2>/dev/null; coverage=95; threshold=80; if [ "$coverage" -ge "$threshold" ]; then echo "coverage $coverage% meets threshold $threshold%"; else echo "coverage $coverage% is below threshold $threshold%"; fi; true ; } > /tmp/routine-attempt-3/FullAuditRun
+      - persist_to_workspace:
+          root: /tmp/routine-attempt-3
+          paths:
+            - 'FullAuditRun'
+  RuleEngineContainerCleanup:
+    docker:
+      - image: cimg/base:2024.05
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: Release code generator to remaining regions (step 2)
+          command: |
+            mkdir -p /tmp/routine-attempt-3
+            { set +o pipefail 2>/dev/null; tally=0; n=1; while ((n <= 12)); do tally=$((tally + n)); n=$((n + 1)); done; echo "$tally"; true ; } > /tmp/routine-attempt-3/fallback-image-tagging
+      - persist_to_workspace:
+          root: /tmp/routine-attempt-3
+          paths:
+            - 'fallback-image-tagging'
+  EnsuringTaggedRelease:
+    docker:
+      - image: cimg/base:2024.05
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: Collect build statistics
+          command: |
+            mkdir -p /tmp/routine-attempt-3
+            { set +o pipefail 2>/dev/null; echo "phase 6 started"; arr=(aspen nebula owl copper banana); found=no; for a in "${arr[@]}"; do if [ "$a" = aspen ]; then found=yes; fi; done; echo "$found"; true ; } > /tmp/routine-attempt-3/configure-and-start-catalog
+      - persist_to_workspace:
+          root: /tmp/routine-attempt-3
+          paths:
+            - 'configure-and-start-catalog'
+  TrackingLoggerPerformance:
+    docker:
+      - image: cimg/base:2024.05
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: Archive settings loader build artifacts to shared volume
+          command: |
+            mkdir -p /tmp/routine-attempt-3
+            { set +o pipefail 2>/dev/null; swap() { echo "$2 $1"; }; swap ram tau; true ; } > /tmp/routine-attempt-3/ConverterInstall
+      - persist_to_workspace:
+          root: /tmp/routine-attempt-3
+          paths:
+            - 'ConverterInstall'
+  final-regression-test-pipeline:
+    docker:
+      - image: cimg/base:2024.05
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/routine-attempt-3
+      - run:
+          name: expireBuildCacheAfterMigration
+          command: |
+            mkdir -p /tmp/routine-attempt-3
+            { set +o pipefail 2>/dev/null; echo "checking mail queue"; echo "step 5 of 9 finished"; echo 'mail queue check passed'; true ; } > /tmp/routine-attempt-3/partner-portal-release-notes
+      - persist_to_workspace:
+          root: /tmp/routine-attempt-3
+          paths:
+            - 'partner-portal-release-notes'
+workflows:
+  rateLimiterLibrarySegment4Of4:
+    jobs:
+      - asset-download-run-cycle-4
+      - portal-production-deployment:
+          requires:
+            - asset-download-run-cycle-4
+      - logger-artifact-removal:
+          requires:
+            - portal-production-deployment
+      - deferred-notification:
+          requires:
+            - portal-production-deployment
+      - scan-upload-service:
+          requires:
+            - deferred-notification
+      - on-demand-generation:
+          requires:
+            - scan-upload-service
+      - quick-sync:
+          requires:
+            - scan-upload-service
+      - complete-compression:
+          requires:
+            - quick-sync
+      - CheckForInvalidLinks:
+          requires:
+            - complete-compression
+      - DiscoverStressTests:
+          requires:
+            - complete-compression
+      - one-time-snapshot:
+          requires:
+            - DiscoverStressTests
+      - toolkit-security-scan:
+          requires:
+            - one-time-snapshot
+      - FindingSecurityAdvisories:
+          requires:
+            - one-time-snapshot
+      - RepositoryCheckoutPipeline:
+          requires:
+            - FindingSecurityAdvisories
+      - BackgroundStateSnapshot:
+          requires:
+            - RepositoryCheckoutPipeline
+      - checking-memory-leaks:
+          requires:
+            - RepositoryCheckoutPipeline
+      - purge-analyzer-dependency-cache:
+          requires:
+            - checking-memory-leaks
+      - MonitorMiddleware:
+          requires:
+            - purge-analyzer-dependency-cache
+      - scheduledResourceRemoval:
+          requires:
+            - purge-analyzer-dependency-cache
+      - approval-notification:
+          requires:
+            - scheduledResourceRemoval
+      - configuringAccessTokens:
+          requires:
+            - approval-notification
+      - registry-backup-segment-4:
+          requires:
+            - approval-notification
+      - purge-old-logs:
+          requires:
+            - registry-backup-segment-4
+      - gradual-roll-out-pass-2:
+          requires:
+            - purge-old-logs
+      - initial-telemetry-release-build:
+          requires:
+            - purge-old-logs
+      - complete-fuzz-test-wave-3:
+          requires:
+            - initial-telemetry-release-build
+      - log-compression-task:
+          requires:
+            - complete-fuzz-test-wave-3
+      - full-checkout-chunk-2-of-7:
+          requires:
+            - complete-fuzz-test-wave-3
+      - loader-binary:
+          requires:
+            - full-checkout-chunk-2-of-7
+      - dispatcher-release-gate:
+          requires:
+            - loader-binary
+      - completeSchemaComparisonRun:
+          requires:
+            - loader-binary
+      - continuous-tagging:
+          requires:
+            - completeSchemaComparisonRun
+      - CopyNameServerArtifacts:
+          requires:
+            - continuous-tagging
+      - engine-release-artifacts:
+          requires:
+            - continuous-tagging
+      - RuleEngineContainerCleanup:
+          requires:
+            - engine-release-artifacts
+      - CreateSignatures:
+          requires:
+            - RuleEngineContainerCleanup
+      - AttachCoverageReportInParallel:
+          requires:
+            - RuleEngineContainerCleanup
+      - EnsuringTaggedRelease:
+          requires:
+            - AttachCoverageReportInParallel
+      - secondary-token-rotation-phase:
+          requires:
+            - EnsuringTaggedRelease
+      - Matrix:
+          requires:
+            - EnsuringTaggedRelease
+      - TrackingLoggerPerformance:
+          requires:
+            - Matrix
+      - UpdateReleaseTag:
+          requires:
+            - TrackingLoggerPerformance
+      - stamp-loader-version:
+          requires:
+            - TrackingLoggerPerformance
+      - final-regression-test-pipeline:
+          requires:
+            - stamp-loader-version
+      - PreSubmitSanityChecks:
+          requires:
+            - final-regression-test-pipeline
+  daily-lint:
+    jobs:
+      - archiveAndUploadReleaseFiles
+      - QueryPlannerDeploySlot6:
+          requires:
+            - archiveAndUploadReleaseFiles
+      - RefreshSearchLayerCache:
+          requires:
+            - archiveAndUploadReleaseFiles
+      - complete-comparison:
+          requires:
+            - RefreshSearchLayerCache
+      - manual-deployment-notification:
+          requires:
+            - RefreshSearchLayerCache
+      - FlagInsecureSettings:
+          requires:
+            - manual-deployment-notification
+      - post-compile-audit:
+          requires:
+            - manual-deployment-notification
+      - optional-branch-sync:
+          requires:
+            - post-compile-audit
+      - scheduler-plugins:
+          requires:
+            - post-compile-audit
+      - BundleStaticAssetsInParallel:
+          requires:
+            - scheduler-plugins
+      - PushImageWithoutCompression:
+          requires:
+            - scheduler-plugins
+      - ScanRuntimeDependencies:
+          requires:
+            - PushImageWithoutCompression
+      - back-end-release-artifacts:
+          requires:
+            - PushImageWithoutCompression
+      - SaveTimingData:
+          requires:
+            - back-end-release-artifacts
+      - ScheduledCheckout:
+          requires:
+            - back-end-release-artifacts
+      - editor-smoke-tests:
+          requires:
+            - ScheduledCheckout
+      - count-blank-lines:
+          requires:
+            - ScheduledCheckout
+      - credential-rotation-job:
+          requires:
+            - count-blank-lines
+      - post-build-data-extraction:
+          requires:
+            - count-blank-lines
+      - run-slow-tests-on-success:
+          requires:
+            - post-build-data-extraction
+      - export-coverage-summary:
+          requires:
+            - post-build-data-extraction
+      - publish-build-outputs:
+          requires:
+            - export-coverage-summary
+      - BackEndCompatibilityChecks:
+          requires:
+            - export-coverage-summary
+      - NotificationJob:
+          requires:
+            - BackEndCompatibilityChecks
+      - crossPlatformDatabaseSetup:
+          requires:
+            - BackEndCompatibilityChecks
+      - CompileAndTestConverter:
+          requires:
+            - crossPlatformDatabaseSetup
+      - pre-sync-manifest-generation:
+          requires:
+            - crossPlatformDatabaseSetup
+      - deferred-packaging:
+          requires:
+            - pre-sync-manifest-generation
+      - StorageRelease:
+          requires:
+            - pre-sync-manifest-generation
+      - sync-service-build-metadata:
+          requires:
+            - StorageRelease
